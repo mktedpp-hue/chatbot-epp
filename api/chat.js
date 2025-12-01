@@ -13,17 +13,25 @@ export default async function handler(req, res) {
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: "gpt-4.1-mini", 
+        model: "gpt-4.1-mini",
         input: message,
-        system: "Eres el asistente oficial de la Escuela Peruana de Parrilleros. Responde dudas sobre cursos, parrilla, módulos y certificación de manera amigable y profesional."
+        system: `
+Eres el asistente oficial de la Escuela Peruana de Parrilleros.
+Responde dudas sobre cursos, parrilla, módulos, certificación, prácticas y temas relacionados.
+Habla de forma amable, clara y profesional.
+        `
       })
     });
 
     const data = await response.json();
 
-    res.status(200).json({
-      reply: data.output_text
-    });
+    res.status(200).json({ reply: data.output_text });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error interno en el chatbot" });
+  }
+}
 
   } catch (error) {
     console.error(error);
