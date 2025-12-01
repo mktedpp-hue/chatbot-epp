@@ -2,65 +2,145 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Chatbot - Escuela Peruana de Parrilleros</title>
+  <title>Chatbot EPP - Escuela Peruana de Parrilleros</title>
+
   <style>
     body {
-      font-family: Arial;
-      background: #f3f3f3;
-      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: #f1f1f1;
+      margin: 0;
+      padding: 0;
     }
+
     #chat-container {
       width: 100%;
-      max-width: 600px;
-      margin: auto;
+      max-width: 700px;
+      margin: 40px auto;
       background: white;
-      padding: 15px;
       border-radius: 8px;
-      box-shadow: 0 0 10px #0003;
+      box-shadow: 0 0 10px #0002;
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+      overflow: hidden;
     }
-    textarea {
-      width: 100%;
-      height: 80px;
+
+    #messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .msg-user {
+      align-self: flex-end;
+      background: #c0392b;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 10px 10px 0 10px;
+      max-width: 75%;
+      white-space: pre-wrap;
+    }
+
+    .msg-bot {
+      align-self: flex-start;
+      background: #e0e0e0;
+      padding: 10px 15px;
+      border-radius: 10px 10px 10px 0;
+      max-width: 75%;
+      white-space: pre-wrap;
+    }
+
+    #input-area {
+      display: flex;
+      padding: 12px;
+      gap: 10px;
+      border-top: 1px solid #ddd;
+      background: #fafafa;
+    }
+
+    #user-input {
+      flex: 1;
+      font-size: 16px;
       padding: 10px;
-      margin-bottom: 10px;
+      border-radius: 5px;
+      border: 1px solid #bbb;
     }
-    button {
-      padding: 10px 20px;
+
+    #send-btn {
       background: #c0392b;
       color: white;
       border: none;
-      cursor: pointer;
+      padding: 10px 18px;
       border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
     }
-    #response {
-      margin-top: 20px;
-      white-space: pre-wrap;
+
+    #send-btn:hover {
+      background: #a5281d;
     }
   </style>
 </head>
 <body>
 
-  <div id="chat-container">
-    <h2>🤖 Asistente EPP</h2>
-    <textarea id="msg" placeholder="Escribe tu pregunta aquí..."></textarea>
-    <button onclick="sendMsg()">Enviar</button>
+<div id="chat-container">
+  
+  <div id="messages"></div>
 
-    <div id="response"></div>
+  <div id="input-area">
+    <input type="text" id="user-input" placeholder="Escribe tu mensaje..." />
+    <button id="send-btn">Enviar</button>
   </div>
 
-<script>
-async function sendMsg() {
-  const message = document.getElementById("msg").value;
+</div>
 
-  const res = await fetch("/api/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message })
+<script>
+  const messagesDiv = document.getElementById("messages");
+  const input = document.getElementById("user-input");
+  const button = document.getElementById("send-btn");
+
+  // Evento del botón
+  button.addEventListener("click", sendMessage);
+
+  // Permitir enviar con ENTER
+  input.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") sendMessage();
   });
 
-  const data = await res.json();
-  document.getElementById("response").innerText = data.reply;
-}
+  function appendMessage(text, sender) {
+    const msg = document.createElement("div");
+    msg.classList.add(sender === "user" ? "msg-user" : "msg-bot");
+    msg.textContent = text;
+    messagesDiv.appendChild(msg);
+
+    // Scroll automático hacia abajo
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    // Mostrar mensaje del usuario
+    appendMessage(text, "user");
+
+    input.value = "";
+
+    // Llamar a tu backend en Vercel
+    const res = await fetch("https://TU-PROYECTO.vercel.app/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text })
+    });
+
+    const data = await res.json();
+
+    // Mostrar respuesta del bot
+    appendMessage(data.reply, "bot");
+  }
 </script>
 
 </body>
